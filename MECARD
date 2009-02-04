@@ -1,0 +1,67 @@
+#!/bin/sh
+
+TEL="+49 179 4737663"
+LOOKUP="dd3d7441"
+
+GPG="gpg --list-keys --with-fingerprint --with-colons $LOOKUP"
+NAME=`$GPG | grep ^pub | cut -d: -f 10 | cut -d'<' -f 1 | sed 's/ $//'`
+EMAIL=`$GPG | grep ^pub | cut -d: -f 10 | cut -d'<' -f 2 | cut -d'>' -f 1`
+HEXFINGERPRINT=`$GPG | grep ^fpr | cut -d: -f 10`
+REST=$HEXFINGERPRINT
+
+FINGERPRINT=""
+
+while [ "x" != "x$REST" ];
+do
+	cutarg="-b -4"
+	if [ "x" = "x$FINGERPRINT" ];
+	then
+		FINGERPRINT=`echo $REST | cut $cutarg `
+	else
+		FINGERPRINT="$FINGERPRINT\hspace{\stretch{1}}`echo $REST | cut $cutarg `"
+	fi
+	REST=`echo $REST | cut $cutarg --complement`
+done
+
+FINGERPRINT=`echo $FINGERPRINT`
+
+echo name: $NAME
+echo fingerprint: $FINGERPRINT
+echo hexfingerprint: $HEXFINGERPRINT
+echo email: $EMAIL
+echo tel: $TEL
+
+QRSTRING="MECARD:N:$NAME;TEL:$TEL;EMAIL:$EMAIL;NOTE:$HEXFINGERPRINT;;"
+qrencode -m 0 -s 40 -o qr.png "$QRSTRING"
+
+cat > bizcard.tex << EOF
+\documentclass[a4paper]{article}
+
+\usepackage[flat]{bizcard}
+\usepackage{graphicx}
+
+\begin{document}
+
+% 51 x 89 aussen
+% 37 x 75 innen 7,7 - 44,82
+\begin{bizcard}
+  \sffamily
+
+  %\put(0,0){\framebox(89,51){}}
+  %\put(7,7){\framebox(75,37){}}
+  \put(7,44){\makebox(0,0)[tl]{\includegraphics[height=33mm]{qr.png}}}
+
+  \put(82,44){\makebox(0,0)[tr]{\Large\bfseries{}$NAME}}
+  \put(82,15){\makebox(0,4)[br]{$TEL}}
+  \put(82,11){\makebox(0,4)[br]{$EMAIL}}
+  \put(7,7){\makebox(75,0)[bl]{\tt\footnotesize{}$FINGERPRINT}}
+
+\end{bizcard}
+
+\end{document}
+\endinput
+EOF
+
+pdflatex bizcard.tex
+
+#qrencode -o - -8 "MECARD:N:Arne Wichmann;TEL:+491794737663;EMAIL:arnew@rasentrimmer.org;NOTE:C953699BAEA6053D43D503BF2E3E6288DD3D7441;;"
