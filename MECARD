@@ -24,9 +24,34 @@ fi
 
 # extract info from gpg
 GPG="gpg --list-keys --with-fingerprint --with-colons $LOOKUP"
-NAME=`$GPG | awk -F: '/@/ { name=$(NF -1); gsub(" \\\\(.*", "", name); print name; exit(0); }'`
+NAME=$($GPG | awk -F: '/@/ {
+	for (i=1; i<=NF; ++i)
+	{
+		if (match($i, "@"))
+		{
+			name=$i;
+			break;
+		}
+	}
+	gsub(" \\(.*", "", name);
+	gsub(" <.*", "", name);
+	print name;
+	exit(0);
+}')
 MCNAME=`echo $NAME | awk '{ printf("%s,", $NF); for (i=1; i<NF; ++i) { printf("%s ", $i) } }' | sed 's/ $//'`
-EMAIL=`$GPG | awk -F: '/@/ { email=$(NF -1); email=substr(email, index(email, "<") +1); print substr(email, 1, length(email) -1); exit(0); }'`
+EMAIL=$($GPG | awk -F: '/@/ {
+	for (i=1; i<=NF; ++i)
+	{
+		if (match($i, "@"))
+		{
+			email=$i;
+			break;
+		}
+	}
+	email=substr(email, index(email, "<") +1);
+	print substr(email, 1, length(email) -1);
+	exit(0);
+}')
 HEXFINGERPRINT=`$GPG | grep ^fpr | cut -d: -f 10`
 REST=$HEXFINGERPRINT
 
