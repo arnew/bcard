@@ -1,5 +1,6 @@
 #!/bin/sh
 # CC by nc sa Arne Wichmann <arnew@rasentrimmer.org>
+#	Karsten Borgwaldt <kb@kb.ccchl.de>
 #
 # you will need the following: pdflatex, qrencode, bizcard.sty
 # look at all places marked with TODO
@@ -7,13 +8,25 @@
 # for basic use fill out these values:
 # TODO your phone:
 TEL=""
+MOBILE=""
 # TODO something which gnupg will allow to find your key
 LOOKUP=""
+# TODO your jabber ID
+JABBER=""
+# TODO your postal address in two lines
+ADDRESS1=""
+ADDRESS2=""
+
+if [ -f "$HOME/.mecard" ]
+then
+	source "$HOME/.mecard"
+fi
 
 # extract info from gpg
 GPG="gpg --list-keys --with-fingerprint --with-colons $LOOKUP"
-NAME=`$GPG | grep ^pub | cut -d: -f 10 | cut -d'<' -f 1 | sed 's/ $//'`
-EMAIL=`$GPG | grep ^pub | cut -d: -f 10 | cut -d'<' -f 2 | cut -d'>' -f 1`
+NAME=`$GPG | awk -F: '/@/ { name=$(NF -1); gsub(" \\\\(.*", "", name); print name; exit(0); }'`
+MCNAME=`echo $NAME | awk '{ printf("%s,", $NF); for (i=1; i<NF; ++i) { printf("%s ", $i) } }' | sed 's/ $//'`
+EMAIL=`$GPG | awk -F: '/@/ { email=$(NF -1); email=substr(email, index(email, "<") +1); print substr(email, 1, length(email) -1); exit(0); }'`
 HEXFINGERPRINT=`$GPG | grep ^fpr | cut -d: -f 10`
 REST=$HEXFINGERPRINT
 
@@ -40,8 +53,9 @@ echo email: $EMAIL
 echo tel: $TEL
 
 # HACK if you want additional info in your MECARD add here
-QRSTRING="MECARD:N:$NAME;TEL:$TEL;EMAIL:$EMAIL;NOTE:$HEXFINGERPRINT;;"
+QRSTRING="MECARD:N:$MCNAME;TEL:$(echo $TEL | sed 's/ //g');TEL:$(echo $MOBILE | sed 's/ //g');EMAIL:$EMAIL;ADR:$ADDRESS1,$ADDRESS2;NOTE:$HEXFINGERPRINT;;"
 qrencode -m 0 -s 40 -o qr.png "$QRSTRING"
+
 
 # TODO latex generation: change template here
 cat > bizcard.tex << EOF
@@ -49,6 +63,7 @@ cat > bizcard.tex << EOF
 
 \usepackage[flat]{bizcard}
 \usepackage{graphicx}
+\usepackage[utf8]{inputenc}
 
 \begin{document}
 
@@ -60,9 +75,15 @@ cat > bizcard.tex << EOF
   \put(7,44){\makebox(0,0)[tl]{\includegraphics[height=33mm]{qr.png}}}
 
   \put(82,44){\makebox(0,0)[tr]{\Large\bfseries{}$NAME}}
-  \put(82,15){\makebox(0,4)[br]{$TEL}}
-  \put(82,11){\makebox(0,4)[br]{$EMAIL}}
-  \put(7,7){\makebox(75,0)[bl]{\tt\footnotesize{}$FINGERPRINT}}
+
+  \put(82,35){\makebox(0,0)[tr]{$ADDRESS1}}
+  \put(82,30){\makebox(0,0)[tr]{$ADDRESS2}}
+
+  \put(82,21){\makebox(0,4)[br]{$TEL}}
+  \put(82,17){\makebox(0,4)[br]{$MOBILE}}
+  \put(82,13){\makebox(0,4)[br]{$EMAIL}}
+  \put(82,8){\makebox(0,4)[br]{$JABBER}}
+  \put(7,3){\makebox(75,0)[bl]{\tt\footnotesize{}$FINGERPRINT}}
 
 \end{bizcard}
 
