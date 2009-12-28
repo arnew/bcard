@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # CC by nc sa Arne Wichmann <arnew@rasentrimmer.org>
 #	Karsten Borgwaldt <kb@kb.ccchl.de>
 #
@@ -16,6 +16,8 @@ JABBER=""
 # TODO your postal address in two lines
 ADDRESS1=""
 ADDRESS2=""
+# TODO layout of the card
+LAYOUT=""
 
 if [ -f "$HOME/.mecard" ]
 then
@@ -81,6 +83,22 @@ echo tel: $TEL
 QRSTRING="MECARD:N:$MCNAME;TEL:$(echo $TEL | sed 's/ //g');TEL:$(echo $MOBILE | sed 's/ //g');EMAIL:$EMAIL;ADR:$ADDRESS1,$ADDRESS2;NOTE:$HEXFINGERPRINT;;"
 qrencode -m 0 -s 40 -o qr.png "$QRSTRING"
 
+case "$LAYOUT" in
+	arne)
+		B1=( "" "" )
+		B2=( "" "" "$MOBILE" "$EMAIL" )
+		B3=( "$FINGERPRINT" "" )
+	;;
+	karsten)
+		B1=( "$ADDRESS1" "$ADDRESS2" )
+		B2=( "$TEL" "$MOBILE" "$EMAIL" "$JABBER" )
+		B3=( "$FINGERPRINT" "" )
+	;;
+	*)
+		: do something funny here
+		B3=( "" "You should \_really\_ use a \\\$LAYOUT" )
+	;;
+esac
 
 # TODO latex generation: change template here
 cat > bizcard.tex << EOF
@@ -101,14 +119,16 @@ cat > bizcard.tex << EOF
 
   \put(82,44){\makebox(0,0)[tr]{\Large\bfseries{}$NAME}}
 
-  \put(82,35){\makebox(0,0)[tr]{$ADDRESS1}}
-  \put(82,30){\makebox(0,0)[tr]{$ADDRESS2}}
+  \put(82,35){\makebox(0,0)[tr]{${B1[0]}}}
+  \put(82,31){\makebox(0,0)[tr]{${B1[1]}}}
 
-  \put(82,21){\makebox(0,4)[br]{$TEL}}
-  \put(82,17){\makebox(0,4)[br]{$MOBILE}}
-  \put(82,13){\makebox(0,4)[br]{$EMAIL}}
-  \put(82,8){\makebox(0,4)[br]{$JABBER}}
-  \put(7,3){\makebox(75,0)[bl]{\tt\footnotesize{}$FINGERPRINT}}
+  \put(82,23){\makebox(0,4)[br]{${B2[0]}}}
+  \put(82,19){\makebox(0,4)[br]{${B2[1]}}}
+  \put(82,15){\makebox(0,4)[br]{${B2[2]}}}
+  \put(82,11){\makebox(0,4)[br]{${B2[3]}}}
+
+  \put(7,7){\makebox(75,0)[bl]{\tt\footnotesize{}${B3[0]}}}
+  \put(7,3){\makebox(75,0)[bl]{\tt\footnotesize{}${B3[1]}}}
 
 \end{bizcard}
 
