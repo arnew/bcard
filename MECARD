@@ -83,6 +83,20 @@ echo tel: $TEL
 QRSTRING="MECARD:N:$MCNAME;TEL:$(echo $TEL | sed 's/ //g');TEL:$(echo $MOBILE | sed 's/ //g');EMAIL:$EMAIL;ADR:$ADDRESS1,$ADDRESS2;NOTE:$HEXFINGERPRINT;;"
 qrencode -m 0 -s 40 -o qr.png "$QRSTRING"
 
+# prepare for LaTeX
+latex_escape()
+{
+	set -x
+	local varname="$1"
+	export ${varname}=$(eval echo \$$varname | sed 's/_/\\_/g')
+	set +x
+}
+
+for i in EMAIL JABBER
+do
+	latex_escape $i
+done
+
 case "$LAYOUT" in
 	arne)
 		B1=( "" "" )
