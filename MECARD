@@ -125,24 +125,24 @@ cat > bizcard.tex << EOF
 \begin{document}
 
 % 51 x 89 aussen
-% 37 x 75 innen 7,7 - 44,82
+% 39 x 77 innen 6,6 - 45,83
 \begin{bizcard}
   \sffamily
 
-  \put(7,44){\makebox(0,0)[tl]{\includegraphics[height=33mm]{qr.png}}}
+  \put(6,45){\makebox(0,0)[tl]{\includegraphics[height=33mm]{qr.png}}}
 
-  \put(82,44){\makebox(0,0)[tr]{\Large\bfseries{}$NAME}}
+  \put(83,45){\makebox(0,0)[tr]{\Large\bfseries{}$NAME}}
 
-  \put(82,35){\makebox(0,0)[tr]{${B1[0]}}}
-  \put(82,31){\makebox(0,0)[tr]{${B1[1]}}}
+  \put(83,35){\makebox(0,0)[tr]{${B1[0]}}}
+  \put(83,31){\makebox(0,0)[tr]{${B1[1]}}}
 
-  \put(82,23){\makebox(0,4)[br]{${B2[0]}}}
-  \put(82,19){\makebox(0,4)[br]{${B2[1]}}}
-  \put(82,15){\makebox(0,4)[br]{${B2[2]}}}
-  \put(82,11){\makebox(0,4)[br]{${B2[3]}}}
+  \put(83,23){\makebox(0,4)[br]{${B2[0]}}}
+  \put(83,19){\makebox(0,4)[br]{${B2[1]}}}
+  \put(83,15){\makebox(0,4)[br]{${B2[2]}}}
+  \put(83,11){\makebox(0,4)[br]{${B2[3]}}}
 
-  \put(7,7){\makebox(75,0)[bl]{\tt\footnotesize{}${B3[0]}}}
-  \put(7,3){\makebox(75,0)[bl]{\tt\footnotesize{}${B3[1]}}}
+  \put(6,7){\makebox(77,0)[bl]{\tt\footnotesize{}${B3[0]}}}
+  \put(6,3){\makebox(77,0)[bl]{\tt\footnotesize{}${B3[1]}}}
 
 \end{bizcard}
 
