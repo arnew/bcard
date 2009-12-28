@@ -80,7 +80,16 @@ echo email: $EMAIL
 echo tel: $TEL
 
 # HACK if you want additional info in your MECARD add here
-QRSTRING="MECARD:N:$MCNAME;TEL:$(echo $TEL | sed 's/ //g');TEL:$(echo $MOBILE | sed 's/ //g');EMAIL:$EMAIL;ADR:$ADDRESS1,$ADDRESS2;NOTE:$HEXFINGERPRINT;;"
+QRSTRING="MECARD:"
+if [ -n "$MCNAME" ]; then QRSTRING+="N:$MCNAME;"; fi
+if [ -n "$TEL" ]; then QRSTRING+="TEL:$(echo $TEL | sed 's/ //g');"; fi
+if [ -n "$MOBILE" ]; then QRSTRING+="TEL:$(echo $MOBILE | sed 's/ //g');"; fi
+if [ -n "$EMAIL" ]; then QRSTRING+="EMAIL:$EMAIL;"; fi
+if [ -n "$ADDRESS1" ]; then QRSTRING+="ADR:$ADDRESS1,$ADDRESS2;"; fi
+if [ -n "$HEXFINGERPRINT" ]; then QRSTRING+="NOTE:$HEXFINGERPRINT;"; fi
+QRSTRING+=";"
+
+echo qrstring: $QRSTRING
 qrencode -m 0 -s 40 -o qr.png "$QRSTRING"
 
 # prepare for LaTeX
